@@ -117,4 +117,47 @@ public class DBManager {
             }
         }
     }
+    
+    public Question retrieve(int chapterNo, int questionNo){
+        Question q = new Question();
+        
+        String st = "Select * from intro11equiz where chapterNo = ? and questionNo = ?";
+        
+        try{
+            psmt = conn.prepareCall(st);
+        } catch(Exception e){
+            message = "Error in creating prepared statement";
+            return q;
+        }
+        
+        ResultSet res = null;
+        try{
+            psmt.setInt(1, chapterNo);
+            psmt.setInt(2, questionNo);
+            res = psmt.executeQuery();
+            
+            if (!res.isBeforeFirst()){
+                message = "Chapter " + chapterNo + " Question " + questionNo + "cannot be found";
+            } else {
+                res.next();
+                q.setChapter(res.getInt(1));
+                q.setQuestion(res.getInt(2));
+                q.setText(res.getString(3));
+                q.setChoiceA(res.getString(4));
+                q.setChoiceB(res.getString(5));
+                q.setChoiceC(res.getString(6));
+                q.setChoiceD(res.getString(7));
+                q.setChoiceE(res.getString(8));;
+                q.setAnswerKey(res.getString(9));
+                q.setHint(res.getString(10));
+                
+                message = "Question found";
+            }
+        } catch(Exception e){
+            message = "Error in retrieval";
+            return q;
+        }
+        
+        return q;
+    }
 }
