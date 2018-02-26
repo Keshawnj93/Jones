@@ -11,8 +11,10 @@ public class TestClass1 {
     public static void main(String[] args) {
         
         DBManager db = new DBManager();
-        Question q = db.retrieve(8, 30);
-        q.print();
+        Question q = db.retrieve(5, 1);
+        System.out.println(q.getText());
+//        Question q = db.retrieve(8, 30);
+//        q.print();
 //        DBManager db = new DBManager();
 //        
 //        

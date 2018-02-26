@@ -1,21 +1,16 @@
 <%-- 
-    Document   : OneQuestion
-    Created on : Feb 14, 2018, 10:08:32 PM
+    Document   : GradeOneQuestion
+    Created on : Feb 26, 2018, 1:59:37 AM
     Author     : Keshawn
 --%>
-
-<!-- Use the following URL to access on local machine: 
-http://localhost:8080/Jones/OneQuestion.jsp?chapterNo=1&questionNo=1&&title=project1 
--->
 
 <%@page import= "Beans.QuestionBean" contentType="text/html" pageEncoding="UTF-8"%>
 <jsp:useBean id= "QuestionBeanID" class= "Beans.QuestionBean" scope= "session">
 </jsp:useBean>
-<% QuestionBeanID.setMode("Display"); 
-   QuestionBeanID.setChapterNo(Integer.parseInt(request.getParameter("chapterNo")));
-   QuestionBeanID.setQuestionNo(Integer.parseInt(request.getParameter("questionNo")));
-   QuestionBeanID.setTitle(request.getParameter("title"));
-   QuestionBeanID.printPage(); %>
+<% QuestionBeanID.setMode(request.getParameter("mode")); %>
+<% QuestionBeanID.setChecked(request.getParameterValues("choices")); %>
+<% QuestionBeanID.setSelected(request.getParameter("choices")); %>
+<% QuestionBeanID.printPage(); %>
 
 <!DOCTYPE html>
 <html>
@@ -24,7 +19,7 @@ http://localhost:8080/Jones/OneQuestion.jsp?chapterNo=1&questionNo=1&&title=proj
         <title>Project 1 - Keshawn Jones</title>
     </head>
     <body style="margin-left: auto; margin-right: auto; width: 35%">
-         <form action="GradeOneQuestion.jsp" method="GET">
+        <form>
             <div>
                 <p style="background-color: slategray; color: white; text-align: center; padding: 0px"> Multiple-Choice Question <jsp:getProperty name="QuestionBeanID" property="title" /> </p>                
             </div>
