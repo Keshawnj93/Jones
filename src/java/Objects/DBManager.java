@@ -64,7 +64,7 @@ public class DBManager {
                     + "chapterNo int(11),"
                     + "questionNo int(11),"
                     + "isCorrect bit(1) default 0,"
-                    + "time timestamp default current_timestamp,"
+                    + "time timestamp default current_timestamp on update current_timestamp,"
                     + "hostname varchar(100),"
                     + "answerA bit(1) default 0,"
                     + "answerB bit(1) default 0,"
@@ -274,7 +274,7 @@ public class DBManager {
     
     public void updateAnswer(Answer a){
         String st = "Update intro11e "
-                + "set isCorrect = ?, hostname = ?, answerA = ?, answerB = ?, answerC = ?, answerD = ?, answerE = ? "
+                + "set isCorrect = ?, time = current_timestamp(), hostname = ?, answerA = ?, answerB = ?, answerC = ?, answerD = ?, answerE = ? "
                 + "where chapterNo = ? and questionNo = ?;";
         Statement stmt = null;
         ResultSet res = null;

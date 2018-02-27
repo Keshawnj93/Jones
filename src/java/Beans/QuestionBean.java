@@ -35,55 +35,249 @@ public class QuestionBean {
             else if (mode.equals("Check My Answer")){                              
                 try{
                     if (checked.length > 0){
-                    Answer a = updateAnswer(q);
+                        Answer a = updateAnswer(q);
                     
-                    //Correct answer. Inform user
-                    if (a.getIsCorrect() == 1){
-                        body = body + "<br /><font color=\"green\"><p>Your answer is correct</p></font>";
-                    }
-                    
-                    //Incorrect answer. Inform user
-                    if (a.getIsCorrect() == 0){
-                        String answers = "";
-                        for (String s : checked){
-                            switch (s){
-                                case "0" : answers += "A"; break;
-                                case "1" : answers += "B"; break;
-                                case "2" : answers += "C"; break;
-                                case "3" : answers += "D"; break;
-                                case "4" : answers += "E"; break;    
+                        //Correct answer. Inform user
+                        if (a.getIsCorrect() == 1){
+                            body = body + "<br /><font color=\"green\"><p>Your answer is correct <img src=\"img/project1Check.jpg\"></p></font>";
+                            
+                            if (q.getHint() == null || q.getHint().equals("null")){
+                               // no Hint
+                            }
+                            
+                            //Hint can be displayed
+                            else {
+                                body = body + "<font color=\"green\"><p onclick=\'displayHint()\'>Click here to show an explaination</p></font>"
+                                        + "<font color=\"darkviolet\"><p id=\"hint\"></p>";
                             }
                         }
+                    
+                        //Incorrect answer. Inform user
+                        if (a.getIsCorrect() == 0){
+                            String answers = "";
+                            for (String s : checked){
+                                switch (s){
+                                    case "0" : answers += "A"; break;
+                                    case "1" : answers += "B"; break;
+                                    case "2" : answers += "C"; break;
+                                    case "3" : answers += "D"; break;
+                                    case "4" : answers += "E"; break;    
+                                }
+                            }
                         
-                        body = body + "<br /><font color=\"red\"><p>Your answer " + answers + " is incorrect</p></font>";
-                        body = body + "<font color=\"green\"><p>Click here to show the correct answer</p></font>";
+                            body = body + "<br /><font color=\"red\"><p>Your answer " + answers + " is incorrect <img src=\"img/project1X.jpg\"></p></font>";
+                            //No hint
+                            if (q.getHint() == null || q.getHint().equals("null")){
+                                body = body + "<font color=\"green\"><p id=\"answer\" onClick=\"displayAnswer()\">Click here to show the correct answer</p></font>";
+                            }
+                    
+                            //Hint
+                            else {
+                                body = body + "<font color=\"green\"><p id=\"answer\" onClick=\"displayAnswer()\">Click here to show the correct answer and an explaination</p></font>"
+                                        + "<font color=\"darkviolet\"><p id=\"hint\"></p>";
+                            }
+                        }
                     }
-                }
                 } catch (Exception e){
                     //No answer selected. Notify user
-                    body = body + "<br /><p>You didn't answer this question</p>";
-                    body = body + "<font color=\"green\"><p>Click here to show the correct answer</p></font>";
+                    body = body + "<br /><p>You didn't answer this question <img src=\"img/project1Question.jpg\"></p>";
+                    //No hint
+                    if (q.getHint() == null || q.getHint().equals("null")){
+                        body = body + "<font color=\"green\"><p id=\"answer\" onClick=\"displayAnswer()\">Click here to show the correct answer</p></font>";
+                    }
+                    
+                    //Hint
+                    else {
+                        body = body + "<font color=\"green\"><p id=\"answer\" onClick=\"displayAnswer()\">Click here to show the correct answer and an explaination</p></font>"
+                                + "<font color=\"darkviolet\"><p id=\"hint\"></p>";
+                    }
                 }
                 
                 //Print Get Statistics button. Not yet functional.
                 body = body + "<input type=\"button\" value=\"Get Statistics\" style=\"background-color : green\">";
+                
+                //Print onClick function to display answer and hint
+                printJS(q);
             }
             
         }
     }
     
     private void printQuestion(Question q){
-        body = body + q.getText() + "<br /><br />";
+        //The question contains only one line of text. No code formatting needed
+        if (!q.getText().contains("\n")){
+            body = body + q.getText() + "<br /><br />";
+        }
+        
+        //The question contains multiple lines. Code must be formatted
+        else {
+            formatCode(q);
+        }
+    }
+    
+    private void formatCode(Question q){
+        //Print fist line, containing no code
+        String s = q.getText();
+        String st = s.substring(0, s.indexOf("\n"));
+        body = body + st + "<br /><font size=\"3\" face=\"courier new\">";
+        
+        //While there are still /n in the string, print the lines of code
+       s = s.substring(s.indexOf("\n") + 1);
+       while (s.contains("\n")){
+           body = body + "&emsp;"; 
+           //If starts with a space, print a \t
+           if (s.startsWith(" ")){
+               while (s.startsWith(" ")){
+                   body = body + "&emsp;";
+                   s = s.substring(1);
+               }
+           }
+           st = s.substring(0, s.indexOf("\n"));
+           st = colorCode(st);
+           body = body + st + "<br />";
+           s = s.substring(s.indexOf("\n") + 1);
+       }
+       
+       //Print last line of code, if exists
+       if (!s.isEmpty()){
+           s = colorCode(s);
+           body = "&emsp;" + body + s + "<br />";
+       }
+       
+       body = body + "<br /></font>";
+    }
+    
+    private String colorCode(String s){
+        String ret = colorKeyword(s);
+        ret = colorNum(ret);
+        ret = colorComment(ret);
+        return ret;
+    }
+    
+    private String colorKeyword(String s){
+        String[] keywords = {"abstract", "assert", "boolean", "break", "byte",
+            "switch", "case", "try", "catch", "finally", "char", "class", "continue",
+            "default", "do", "double", "if", "else", "enum", "extends", "final",
+            "float", "for", "implements", "import", "instanceOf", "int", "interface",
+            "long", "native", "new", "package", "private", "protected", "public", "return", 
+            "short", "static", "strictfp", "super", "synchronized", "this", "throw",
+            "throws", "transient", "void", "volatile", "while", "goto", "const"};
+        
+        String ret = "";
+        //First check. Iterate through keywords in order
+        for (String k : keywords){
+            if (s.contains(k) && s.charAt(s.indexOf(k) + k.length()) == ' '){
+                while (s.contains(k)){
+                    if (s.charAt(s.indexOf(k) + k.length()) == ' '){
+                        ret += s.substring(0, s.indexOf(k)) + "<font color=\"green\">" + k + "</font>";
+                        s = s.substring(s.indexOf(k) + k.length());
+                    }
+                }
+            }
+        }
+        
+        //Second check. Iterate through keywords in reverse order
+        for (int i = keywords.length; i > 0; i--){
+            String k = keywords[i-1];
+            if (ret.contains(k) && ret.charAt(ret.indexOf(k) + k.length()) == ' '){
+                String temp = ret;
+                while (temp.contains(k)){
+                    if (temp.charAt(temp.indexOf(k) + k.length()) == ' '){
+                        ret = "<font color=\"green\">" + k + "</font>" + temp.substring(temp.indexOf(k) + k.length());
+                        temp = temp.substring(temp.indexOf(k) + k.length());
+                    }
+                }
+            }
+        } 
+        
+        ret += s;
+        if (!ret.isEmpty()) return ret;
+        return s;
+    }
+    
+    private String colorNum(String s){
+        String ret = "";
+        while (!s.isEmpty()){
+            if (!ret.isEmpty()){
+                switch(s.charAt(0)){
+                    //Check to see if first char in number.
+                    case '0' : 
+                    case '1' : 
+                    case '2' : 
+                    case '3' : 
+                    case '4' : 
+                    case '5' :
+                    case '6' :     
+                    case '7' :     
+                    case '8' :     
+                    case '9' : {
+                        char c = ret.charAt(ret.length() - 1);
+                        //char before number must be ' ', '{', '[', '(' or '.' to exclude variable names
+                        switch (c){
+                            case ' ' :
+                            case '{' :
+                            case '[' :    
+                            case '(' :    
+                            case '.' : {
+                                //Set font of numbers to blue
+                                ret += "<font color=\"blue\">" + s.charAt(0) + "</font>";
+                            } break;
+                            default : ret += s.charAt(0);
+                        }
+                    } break;
+                    default : ret += s.charAt(0);
+                }
+            }
+            
+            //If first char in string in a number, it will be colored
+            else{
+                switch(s.charAt(0)){
+                    //Check to see if first char in number.
+                    case '0' : 
+                    case '1' : 
+                    case '2' : 
+                    case '3' : 
+                    case '4' : 
+                    case '5' :
+                    case '6' :     
+                    case '7' :     
+                    case '8' :     
+                    case '9' : ret += "<font color=\"blue\">" + s.charAt(0) + "</font>"; break;
+                    default : ret += s.charAt(0);
+                 }
+            }
+            
+            s = s.substring(1);
+        }
+        
+        return ret;
+    }
+    
+    private String colorComment(String s){
+        String ret = "";
+        
+        //Single line comment
+        if (s.contains("//")){
+            ret = s.substring(0, s.indexOf("//")) + "<font color=\"darkgray\">" + 
+                    s.substring(s.indexOf("//")) + "</font>";
+        }
+        
+        //No comments
+        else ret = s;
+        return ret;
     }
     
     private void printChoices(Question q){
         //Multiple answers. Checkbox display
         if (q.getAnswerKey().length() > 1){
             String[] s = {q.getChoiceA(), q.getChoiceB(), q.getChoiceC(), q.getChoiceD(), q.getChoiceE()};
+            char c = 'A';
             for (int i = 0; i < s.length; i++){
                 //If choice is not null, print the choice
                 if (!s[i].equals("null") && !s[i].equals(null)){
-                    body = body + "<input type=\"checkbox\" name=\"choices\" value=\"" + i +"\"> " + s[i] + "<br />";
+                    body = body + "<input type=\"checkbox\" name=\"choices\" value=\"" + i +"\">"
+                            + "<font face= \"courier new\" color=\"darkred\">" + c + ". </font>&nbsp;" + s[i] + "<br />";
+                    c++;
                 }
             }
         }
@@ -91,10 +285,18 @@ public class QuestionBean {
         //Single answer. Radio display
         if (q.getAnswerKey().length() == 1){
             String[] s = {q.getChoiceA(), q.getChoiceB(), q.getChoiceC(), q.getChoiceD(), q.getChoiceE()};
+            char c = 'A';
             for (int i = 0; i < s.length; i++){
                 //If choice is not null, print the choice
                 if (!s[i].equals("null") && !s[i].equals(null)){
-                    body = body + "<input type=\"radio\" name=\"choices\" value=\"" + i +"\"> " + s[i] + "<br />";
+                    //For questions begining with a < 
+                    if (s[i].charAt(0) == '<'){
+                        s[i] = "&lt;" + s[i].substring(1);
+                    }
+
+                    body = body + "<input type=\"radio\" name=\"choices\" value=\"" + i +"\">"
+                        + "<font face =\"courier new\" color=\"darkred\">" + c + ". </font>&nbsp;" + s[i] + "<br />";
+                    c++;
                 }
             }
         }
@@ -145,6 +347,19 @@ public class QuestionBean {
             return a;
     }
     
+    private void printJS(Question q){
+        body = body + "<br /><script>"
+                + "function displayAnswer(){ "
+                + "document.getElementById('answer').innerHTML = 'The correct answer is " + q.getAnswerKey().toUpperCase() + "'; "
+                + "document.getElementById('hint').innerHTML = 'Explaination: " + q.getHint() + "'; "
+                + "}</script>";
+        
+        body = body + "<br /><script>"
+                + "function displayHint(){ "
+                + "document.getElementById('hint').innerHTML = 'Explaination: " + q.getHint() + "'; "
+                + "}</script>";
+    }
+    
     /* Getters and Setters */
     public int getChapterNo(){
         return chapterNo;
@@ -153,6 +368,7 @@ public class QuestionBean {
     public void setChapterNo(int i){
         chapterNo = i;
     }
+    
     public int getQuestionNo(){
         return questionNo;
     }
