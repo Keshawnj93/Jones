@@ -20,9 +20,16 @@ public class QuestionBean {
     public void printPage(){
         body = "";
         Question q = db.retrieve(chapterNo, questionNo);
-        if (q.getAnswerKey() == null){
+        //invalid questionNo or chapterNo.
+        if (chapterNo == -1 || questionNo == -1){
+            body = "<font color=\"red\"> Please only enter integers into the chapterNo and questionNo field. <font/>";
+        }
+        
+        //chapter/question combination not found
+        else if (q.getAnswerKey() == null){
             body = "<font color=\"red\"> The requested question could not be found <font/>";
         } else {
+            //question found. print.
             printQuestion(q);
             printChoices(q);
             
@@ -36,10 +43,20 @@ public class QuestionBean {
                 try{
                     if (checked.length > 0){
                         Answer a = updateAnswer(q);
+                        String answers = "";
+                            for (String s : checked){
+                                switch (s){
+                                    case "0" : answers += "A"; break;
+                                    case "1" : answers += "B"; break;
+                                    case "2" : answers += "C"; break;
+                                    case "3" : answers += "D"; break;
+                                    case "4" : answers += "E"; break;    
+                                }
+                            }
                     
                         //Correct answer. Inform user
                         if (a.getIsCorrect() == 1){
-                            body = body + "<br /><font color=\"green\"><p>Your answer is correct <img src=\"img/project1Check.jpg\"></p></font>";
+                            body = body + "<br /><font color=\"green\"><p>Your answer " + answers + " is correct <img src=\"img/project1Check.jpg\"></p></font>";
                             
                             if (q.getHint() == null || q.getHint().equals("null")){
                                // no Hint
@@ -54,16 +71,6 @@ public class QuestionBean {
                     
                         //Incorrect answer. Inform user
                         if (a.getIsCorrect() == 0){
-                            String answers = "";
-                            for (String s : checked){
-                                switch (s){
-                                    case "0" : answers += "A"; break;
-                                    case "1" : answers += "B"; break;
-                                    case "2" : answers += "C"; break;
-                                    case "3" : answers += "D"; break;
-                                    case "4" : answers += "E"; break;    
-                                }
-                            }
                         
                             body = body + "<br /><font color=\"red\"><p>Your answer " + answers + " is incorrect <img src=\"img/project1X.jpg\"></p></font>";
                             //No hint
@@ -106,7 +113,7 @@ public class QuestionBean {
     private void printQuestion(Question q){
         //The question contains only one line of text. No code formatting needed
         if (!q.getText().contains("\n")){
-            body = body + q.getText() + "<br /><br />";
+            body = body + replaceTags(q.getText()) + "<br /><br />";
         }
         
         //The question contains multiple lines. Code must be formatted
@@ -117,13 +124,14 @@ public class QuestionBean {
     
     private void formatCode(Question q){
         //Print fist line, containing no code
-        String s = q.getText();
+        String s = replaceTags(q.getText());
         String st = s.substring(0, s.indexOf("\n"));
         body = body + st + "<br /><font size=\"3\" face=\"courier new\">";
         
         //While there are still /n in the string, print the lines of code
        s = s.substring(s.indexOf("\n") + 1);
        while (s.contains("\n")){
+           s = replaceTags(s);
            body = body + "&emsp;"; 
            //If starts with a space, print a \t
            if (s.startsWith(" ")){
@@ -141,7 +149,7 @@ public class QuestionBean {
        //Print last line of code, if exists
        if (!s.isEmpty()){
            s = colorCode(s);
-           body = "&emsp;" + body + s + "<br />";
+           body = "&emsp;" + body + replaceTags(s) + "<br />";
        }
        
        body = body + "<br /></font>";
@@ -166,12 +174,19 @@ public class QuestionBean {
         String ret = "";
         //First check. Iterate through keywords in order
         for (String k : keywords){
-            if (s.contains(k) && s.charAt(s.indexOf(k) + k.length()) == ' '){
-                while (s.contains(k)){
-                    if (s.charAt(s.indexOf(k) + k.length()) == ' '){
-                        ret += s.substring(0, s.indexOf(k)) + "<font color=\"green\">" + k + "</font>";
-                        s = s.substring(s.indexOf(k) + k.length());
+            try{
+                if (s.contains(k) && s.charAt(s.indexOf(k) + k.length()) == ' '){
+                    while (s.contains(k)){
+                        if (s.charAt(s.indexOf(k) + k.length()) == ' '){
+                            ret += s.substring(0, s.indexOf(k)) + "<font color=\"green\">" + k + "</font>";
+                            s = s.substring(s.indexOf(k) + k.length());
+                        }
                     }
+                }
+            } catch (IndexOutOfBoundsException e){ // Keyword is at the end of the line
+                while (s.contains(k)){
+                    ret += s.substring(0, s.indexOf(k)) + "<font color=\"green\">" + k + "</font>";
+                    s = s.substring(s.indexOf(k) + k.length());
                 }
             }
         }
@@ -275,6 +290,7 @@ public class QuestionBean {
             for (int i = 0; i < s.length; i++){
                 //If choice is not null, print the choice
                 if (!s[i].equals("null") && !s[i].equals(null)){
+                    s[i] = replaceTags(s[i]);
                     body = body + "<input type=\"checkbox\" name=\"choices\" value=\"" + i +"\">"
                             + "<font face= \"courier new\" color=\"darkred\">" + c + ". </font>&nbsp;" + s[i] + "<br />";
                     c++;
@@ -289,11 +305,8 @@ public class QuestionBean {
             for (int i = 0; i < s.length; i++){
                 //If choice is not null, print the choice
                 if (!s[i].equals("null") && !s[i].equals(null)){
-                    //For questions begining with a < 
-                    if (s[i].charAt(0) == '<'){
-                        s[i] = "&lt;" + s[i].substring(1);
-                    }
-
+                    s[i] = replaceTags(s[i]);
+                    
                     body = body + "<input type=\"radio\" name=\"choices\" value=\"" + i +"\">"
                         + "<font face =\"courier new\" color=\"darkred\">" + c + ". </font>&nbsp;" + s[i] + "<br />";
                     c++;
@@ -358,6 +371,40 @@ public class QuestionBean {
                 + "function displayHint(){ "
                 + "document.getElementById('hint').innerHTML = 'Explaination: " + q.getHint() + "'; "
                 + "}</script>";
+    }
+    
+    private String replaceTags(String s){
+        if (s.contains("<") || s.contains(">")){
+            String temp = "";
+            String t = s;
+            for (int j = 0; j < t.length(); j++){
+                
+                if (t.charAt(j) == '<'){
+                    temp = t.substring(0, j) + "&lt";
+                    try {
+                        temp += t.substring(j + 1);
+                    } catch (IndexOutOfBoundsException e){
+                        // < is at the end of the string.
+                    }
+                    
+                    if (!t.isEmpty()) t = temp;
+                }
+                            
+                if (t.charAt(j) == '>'){
+                    temp = t.substring(0, j) + "&gt";
+                    try {
+                        temp += t.substring(j + 1);
+                    } catch (IndexOutOfBoundsException e){
+                        // > is at the end of the string.
+                    }
+                }
+                
+                if (!temp.isEmpty()) t = temp;
+            }
+            s = temp;
+        }
+        
+        return s;
     }
     
     /* Getters and Setters */

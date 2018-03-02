@@ -12,8 +12,19 @@ http://localhost:8080/Jones/OneQuestion.jsp?chapterNo=1&questionNo=1&&title=proj
 <jsp:useBean id= "QuestionBeanID" class= "Beans.QuestionBean" scope= "session">
 </jsp:useBean>
 <% QuestionBeanID.setMode("Display"); 
-   QuestionBeanID.setChapterNo(Integer.parseInt(request.getParameter("chapterNo")));
-   QuestionBeanID.setQuestionNo(Integer.parseInt(request.getParameter("questionNo")));
+   
+    try{
+       QuestionBeanID.setChapterNo(Integer.parseInt(request.getParameter("chapterNo")));
+   } catch (NumberFormatException e){
+       QuestionBeanID.setChapterNo(-1);
+   }
+   
+   try{
+       QuestionBeanID.setQuestionNo(Integer.parseInt(request.getParameter("questionNo")));
+   } catch (NumberFormatException e){
+       QuestionBeanID.setQuestionNo(-1);
+   }
+   
    QuestionBeanID.setTitle(request.getParameter("title"));
    QuestionBeanID.printPage(); %>
 
@@ -26,9 +37,9 @@ http://localhost:8080/Jones/OneQuestion.jsp?chapterNo=1&questionNo=1&&title=proj
     <body style="margin-left: auto; margin-right: auto; width: 35%">
          <form action="GradeOneQuestion.jsp" method="GET">
             <div>
-                <p style="background-color: slategray; color: white; text-align: center; padding: 0px"> Multiple-Choice Question <jsp:getProperty name="QuestionBeanID" property="title" /> </p>                
+                <p style="background-color: midnightblue; color: white; text-align: center; font-size : 18px"> 
+                    Multiple-Choice Question <jsp:getProperty name="QuestionBeanID" property="title" /> </p>
             </div>
-            
             <div style="border: 1px solid orange; padding-top: 0px">
                 <p><jsp:getProperty name="QuestionBeanID" property="body" /></p>
             </div>

@@ -1,12 +1,16 @@
 package Objects;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class QuestionParser {
-    Scanner sc;
+    BufferedReader sc;
     String folder, file;
     
     public QuestionParser(){
@@ -14,9 +18,8 @@ public class QuestionParser {
         file = "chapter1.txt";
         String path = folder + file;
         try{
-            sc = new Scanner(new File(path), "UTF-8");
-        } catch (FileNotFoundException e){
-            sc = new Scanner("");
+            sc = new BufferedReader(new InputStreamReader(new FileInputStream(path), "Cp1252"));
+        } catch (Exception e){
             System.out.println("The file could not be found");
         }
     }
@@ -26,9 +29,8 @@ public class QuestionParser {
         this.file = file;
         String path = folder + file;
         try{
-            sc = new Scanner(new File(path));
-        } catch (FileNotFoundException e){
-            sc = new Scanner("");
+            sc = new BufferedReader(new InputStreamReader(new FileInputStream(path), "Cp1252"));
+        } catch (Exception e){
             System.out.println("The file could not be found");
         }
     }
@@ -38,26 +40,30 @@ public class QuestionParser {
         this.file = file;
         String path = folder + file;
         try{
-            sc = new Scanner(new File(path));
-        } catch (FileNotFoundException e){
-            sc = new Scanner("");
+            sc = new BufferedReader(new InputStreamReader(new FileInputStream(path), "Cp1252"));
+        } catch (Exception e){
             System.out.println("The file could not be found");
         }
     }
     
     public void print(){
-        while(sc.hasNext()){
-            System.out.println(sc.nextLine());
+        String s = "";
+        try{
+            while ((s = sc.readLine()) != null){
+            System.out.println(s);
+            }
+        } catch (Exception e){
+            System.out.println("");
         }
     }
     
-    public ArrayList<Question> allQuestions(){
+    public ArrayList<Question> allQuestions() throws IOException{
         ArrayList<Question> ques = new ArrayList<>();
-        String s = sc.nextLine();
+        String s = sc.readLine();
         int chapter = 0, question = 1;
         
         //First line - set Chapter #
-                String t = s.substring(8).trim();
+                String t = s.substring(s.indexOf(' ')).trim();
                 String u = "";
                 while(t.charAt(0) != ' '){
                     u = u + t.charAt(0);
@@ -65,9 +71,9 @@ public class QuestionParser {
 
                 }
                 chapter = Integer.parseInt(u);
-                s = sc.nextLine();
+                s = sc.readLine();
             
-        while (sc.hasNext()){
+        while ((s = sc.readLine()) != null){
             ques.add(oneQuestion(s, chapter, question));
             question++;
         }
@@ -75,7 +81,7 @@ public class QuestionParser {
         return ques;
     }
     
-    private Question oneQuestion(String s, int chapter, int question){
+    private Question oneQuestion (String s, int chapter, int question) throws IOException{
         Question q = new Question();
         
         //Set Chapter and Question #
@@ -129,7 +135,7 @@ public class QuestionParser {
             }
             if (!s.equals("#")){
                 try{
-                    s = sc.nextLine();
+                    s = sc.readLine();
                     s = s.trim();
                 } catch (Exception e){
                     break;
@@ -152,7 +158,7 @@ public class QuestionParser {
         return (s.equals("a.") || s.equals("b.") || s.equals("c.") ||s.equals("d.") || s.equals("e."));
     }
     
-    public String setQuestionText(Question q, String s){
+    public String setQuestionText(Question q, String s) throws IOException {
         //Remove number from beginning of string
         try{
             s = s.substring(s.indexOf("\t"));
@@ -163,18 +169,16 @@ public class QuestionParser {
         
         s = s.trim(); // Remove leading whitespace
         
-        String set = q.getQuestion() + ". " + s; // First line of question
-        s = sc.nextLine();
+        String set = s; // First line of question
+        s = sc.readLine();
         
         while (!s.startsWith("a.")){ // Add subsequent lines to question text
             set = set + "\n" + s;
-            s = sc.nextLine();
+            s = sc.readLine();
 
         }
         
         q.setText(set); //Set the text in Question class
         return s; // Return altered string
     }
-    
-    
 }

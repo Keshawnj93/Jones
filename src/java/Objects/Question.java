@@ -17,12 +17,12 @@ public class Question {
     private int chapter, question;
     private String text, choiceA, choiceB, choiceC, choiceD, choiceE, answerKey, hint;
     
-    Question(){
+    public Question(){
         chapter = question = 0;
         text = choiceA = choiceB = choiceC = choiceD = choiceE = answerKey = hint = null;
     }
     
-    Question(int ch, int qu, String tx, String a, String b, String c, String d,
+    public Question(int ch, int qu, String tx, String a, String b, String c, String d,
             String e, String an, String h){
         chapter = ch; question = qu; text = tx; choiceA = a; choiceB = b;
         choiceC = c; choiceD = d; choiceE = e; answerKey = an; hint = h;

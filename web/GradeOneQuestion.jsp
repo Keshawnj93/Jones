@@ -21,7 +21,8 @@
     <body style="margin-left: auto; margin-right: auto; width: 35%">
         <form>
             <div>
-                <p style="background-color: slategray; color: white; text-align: center; padding: 0px"> Multiple-Choice Question <jsp:getProperty name="QuestionBeanID" property="title" /> </p>                
+                <p style="background-color: midnightblue; color: white; text-align: center; font-size : 18px"> 
+                    Multiple-Choice Question <jsp:getProperty name="QuestionBeanID" property="title" /> </p>
             </div>
             
             <div style="border: 1px solid orange; padding-top: 0px">

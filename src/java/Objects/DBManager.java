@@ -1,6 +1,7 @@
 package Objects;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,7 +21,7 @@ public class DBManager {
     public DBManager() {
         chapter = question = text = choiceA = choiceB = choiceC = choiceD = choiceE = answerKey = hint = message = null;
         initDB();
-        //populateDB();
+        if (!populated()) populateDB();
     }
 
     public void initDB() {
@@ -36,7 +37,7 @@ public class DBManager {
         //Connect to Database
         conn = null;
         try {
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/javabook", "root", "Flylow13");
+            conn = DriverManager.getConnection("jdbc:mysql://35.185.94.191/jones", "jones", "tiger");
         } catch (Exception e) {
             System.out.println("Error connecting to server");
             System.exit(0);
@@ -82,22 +83,26 @@ public class DBManager {
     
     public void populateDB(){
         List<String> results = new ArrayList<String>();
-
-        File[] files = new File("c:\\selftest\\selftest11e\\").listFiles();
-        //If this pathname does not denote a directory, then listFiles() returns null. 
-
+        File[] files = new File("c:\\selftest\\test\\").listFiles();
+        QuestionParser q;
         for (File file : files) {
             if (file.isFile()) {
                 results.add(file.getName());
                 
-                QuestionParser q = new QuestionParser(file.getName());
-                ArrayList<Question> e = q.allQuestions();
-                for(Question r : e){
+                q = new QuestionParser(file.getName());
+                try{
+                    ArrayList<Question> e = q.allQuestions();
+                    for(Question r : e){
                     insert(r);
+                }
+                } catch (IOException io){
+                    io.printStackTrace();
+                    System.exit(0);
                 }
             }
         }
     }
+    
 
     public void insert(Question q) {
         
@@ -311,5 +316,11 @@ public class DBManager {
         } catch (Exception e){
             message = "Sorry, an error has occured in execution. Please try again";
         }
+    }
+    
+    public boolean populated(){
+        Question q = retrieve(44, 4);
+        if (q.getAnswerKey() != null || q.getAnswerKey().equals("null")) return true;
+        return false;
     }
 }
