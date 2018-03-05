@@ -148,8 +148,9 @@ public class QuestionBean {
        
        //Print last line of code, if exists
        if (!s.isEmpty()){
+           replaceTags(s);
            s = colorCode(s);
-           body = "&emsp;" + body + replaceTags(s) + "<br />";
+           body = "&emsp;" + body + s + "<br />";
        }
        
        body = body + "<br /></font>";
@@ -212,6 +213,7 @@ public class QuestionBean {
     
     private String colorNum(String s){
         String ret = "";
+        char last = 'a';
         while (!s.isEmpty()){
             if (!ret.isEmpty()){
                 switch(s.charAt(0)){
@@ -226,21 +228,37 @@ public class QuestionBean {
                     case '7' :     
                     case '8' :     
                     case '9' : {
-                        char c = ret.charAt(ret.length() - 1);
-                        //char before number must be ' ', '{', '[', '(' or '.' to exclude variable names
-                        switch (c){
+                        //char before number must be a number, ' ', '{', '[', '(' or '.' to exclude variable names
+                        switch (last){
                             case ' ' :
                             case '{' :
                             case '[' :    
                             case '(' :    
-                            case '.' : {
+                            case '.' : 
+                            case '0' : 
+                            case '1' : 
+                            case '2' : 
+                            case '3' : 
+                            case '4' : 
+                            case '5' :
+                            case '6' :     
+                            case '7' :     
+                            case '8' :     
+                            case '9' : {
                                 //Set font of numbers to blue
                                 ret += "<font color=\"blue\">" + s.charAt(0) + "</font>";
+                                last = s.charAt(0);
                             } break;
-                            default : ret += s.charAt(0);
+                            default : {
+                                ret += s.charAt(0);
+                                last = s.charAt(0);
+                            }
                         }
                     } break;
-                    default : ret += s.charAt(0);
+                    default : {
+                        ret += s.charAt(0);
+                        last = s.charAt(0);
+                    }
                 }
             }
             
@@ -257,8 +275,14 @@ public class QuestionBean {
                     case '6' :     
                     case '7' :     
                     case '8' :     
-                    case '9' : ret += "<font color=\"blue\">" + s.charAt(0) + "</font>"; break;
-                    default : ret += s.charAt(0);
+                    case '9' : {
+                        ret += "<font color=\"blue\">" + s.charAt(0) + "</font>";
+                        last = s.charAt(0);
+                    } break;
+                    default : {
+                        ret += s.charAt(0);
+                        last = s.charAt(0);
+                    }
                  }
             }
             

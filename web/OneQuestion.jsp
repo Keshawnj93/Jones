@@ -34,7 +34,7 @@ http://localhost:8080/Jones/OneQuestion.jsp?chapterNo=1&questionNo=1&&title=proj
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Project 1 - Keshawn Jones</title>
     </head>
-    <body style="margin-left: auto; margin-right: auto; width: 35%">
+    <body style="margin-left: auto; margin-right: auto; width: 45%">
          <form action="GradeOneQuestion.jsp" method="GET">
             <div>
                 <p style="background-color: midnightblue; color: white; text-align: center; font-size : 18px"> 
