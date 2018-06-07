@@ -37,7 +37,7 @@ public class DBManager {
         //Connect to Database
         conn = null;
         try {
-            conn = DriverManager.getConnection("jdbc:mysql://35.185.94.191/jones", "jones", "tiger");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/javabook", "root", "Flylow13");
         } catch (Exception e) {
             System.out.println("Error connecting to server");
             System.exit(0);
